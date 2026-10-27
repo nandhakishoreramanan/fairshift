@@ -187,40 +187,6 @@ Once deployed, Google Cloud Run provisions an `https://...run.app` endpoint with
 
 ---
 
-## 9. Structured LinkedIn Submission Post
-
-As specified in the Prompt Wars guidelines, copy and adapt the following structured text for your public LinkedIn submission post:
-
-```text
-🚀 Excited to present FairShift: A Decent Work Platform for Employee-Intensive Organisations!
-
-Built for Prompt Wars 2026 by ACM Student Chapter, SRMIST under the theme of UN SDG 8 (Decent Work and Economic Growth).
-
-📌 Step 1: The Problem
-Millions of frontline workers on construction sites, college campuses, and factories are managed through paper registers, spreadsheets, and informal WhatsApp groups. Workers face opaque pay deductions, fear of retaliation when raising safety hazards, language barriers, and a lack of portable career history. Employers suffer from blind spots regarding workforce fatigue and silent attrition.
-
-📌 Step 2: Solution Fit
-FairShift bridges this divide through two tailored interfaces:
-1. For Workers: An icon-first, voice-enabled mobile web app with 1-tap attendance, transparent payslips explained in regional languages (Tamil, Hindi, Telugu, Bengali), an audio contract reader, a portable Skill Passport, and a game-changing collective "Me Too" grievance mechanism where peer backing escalates safety hazards without exposing individual worker identities.
-2. For Employers: An actionable workforce health dashboard with fatigue alerts (excessive hours, short rest, back-to-back shifts), attrition risk radar, rotating QR gate check-in, and notice broadcast with automated translation.
-We validated FairShift across two distinct sectors: Construction (daily-wage shift work with double overtime) and Higher Education (contract faculty & campus support staff).
-
-📌 Step 3: Our Build
-• Architecture: Node.js 20, Express, PWA Service Worker for low-connectivity environments.
-• Cryptography: HMAC-SHA256 anonymous supporter tokens protecting whistleblower privacy.
-• Accessibility: High contrast, WCAG AA compliant, Web Speech voice synthesis and dictation.
-• Cloud Deployment: Deployed on Google Cloud Run container infrastructure.
-• Verified with 16 automated unit & integration tests, with a repo size strictly under 400 KB!
-
-Check out our code and live demo:
-🔗 GitHub: https://github.com/YOUR_USERNAME/fairshift.git
-🌐 Live Cloud Run: https://YOUR_DEPLOYED_URL.run.app
-
-#PromptWars #ACMSrmist #GoogleForDevelopers #Hack2Skill #SDG8 #DecentWork #CloudRun #WebDevelopment #AI
-```
-
----
-
-## 10. License
+## 9. License
 
 FairShift is open source under the [MIT License](LICENSE).
