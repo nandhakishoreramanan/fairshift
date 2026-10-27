@@ -103,4 +103,27 @@ async function translateToAll(text, sourceLang) {
   return Object.fromEntries(entries);
 }
 
-module.exports = { LANGUAGES, LANGUAGE_CODES, translateText, translateToAll };
+/**
+ * Synthesizes speech using Google Cloud Text-to-Speech API if enabled,
+ * or returns null so the client falls back to native Web Speech API.
+ *
+ * @param {string} text - Content to speak.
+ * @param {string} lang - ISO language code.
+ * @returns {Promise<string|null>} Base64 audio content or null if disabled/error.
+ */
+async function synthesizeSpeech(text, lang) {
+  if (!config.gcp.ttsEnabled || !text || !isSupported(lang)) return null;
+  try {
+    const speechCode = LANGUAGES[lang]?.speech || 'en-IN';
+    const body = await callGoogleApi('https://texttospeech.googleapis.com/v1/text:synthesize', {
+      input: { text },
+      voice: { languageCode: speechCode, ssmlGender: 'NEUTRAL' },
+      audioConfig: { audioEncoding: 'MP3' },
+    });
+    return body?.audioContent || null;
+  } catch {
+    return null;
+  }
+}
+
+module.exports = { LANGUAGES, LANGUAGE_CODES, translateText, translateToAll, synthesizeSpeech };

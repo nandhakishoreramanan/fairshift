@@ -35,6 +35,7 @@
     let stream = null;
     let animId = null;
     let active = true;
+    let modal = null;
 
     const video = h('video', { playsinline: true, muted: true, style: 'width:100%; border-radius:12px; background:#000;' });
     const canvas = document.createElement('canvas');
@@ -49,7 +50,7 @@
         stream.getTracks().forEach((track) => track.stop());
         stream = null;
       }
-      modal.remove();
+      if (modal) modal.remove();
     }
 
     // Fallback file input for devices without WebRTC camera access
@@ -101,7 +102,7 @@
 
     const closeBtn = h('button', { class: 'btn btn-ghost', type: 'button', onclick: cleanup }, '✕ Close Camera');
 
-    const modal = h(
+    modal = h(
       'div',
       {
         class: 'scanner-modal-overlay',

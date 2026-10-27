@@ -84,3 +84,13 @@ test('security: rate limiter sliding window protects sensitive endpoints', () =>
   limiter(req, res, next);
   assert.equal(status, 429);
 });
+
+test('translation: synthesizeSpeech gracefully degrades when Cloud TTS is disabled', async () => {
+  const { synthesizeSpeech, translateText } = require('../src/lib/translate');
+  const audio = await synthesizeSpeech('Test text', 'ta');
+  assert.equal(audio, null); // Gracefully returns null for native Web Speech API fallback
+
+  const sameLang = await translateText('Hello', 'en', 'en');
+  assert.equal(sameLang.text, 'Hello');
+  assert.equal(sameLang.translated, true);
+});

@@ -1,7 +1,7 @@
 /* FairShift worker app – icon-first, voice-first, works on low-end phones. */
 (function () {
   'use strict';
-  const { api, h, toast, speak, dictate, canDictate, deviceTranslate, money, fmtTime, fmtDate, getToken, clearToken } = window.FS;
+  const { api, h, toast, speak, dictate, canDictate, deviceTranslate, money, fmtTime, fmtDate, getToken, setToken, clearToken } = window.FS;
   const I18N = window.I18N;
   const t = I18N.t;
   const ROLE = 'worker';

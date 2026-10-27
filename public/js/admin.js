@@ -1,7 +1,7 @@
 /* FairShift Employer / Admin Dashboard JS */
 (function () {
   'use strict';
-  const { api, h, toast, money, fmtDate, getToken, clearToken } = window.FS;
+  const { api, h, toast, money, fmtDate, getToken, setToken, clearToken } = window.FS;
   const ROLE = 'admin';
 
   const urlParams = new URLSearchParams(window.location.search);

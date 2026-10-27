@@ -42,3 +42,19 @@ test('fatigue: flags excessive weekly hours over 60h', () => {
   assert.equal(res.level, 'high');
   assert.ok(res.flags.some((f) => f.type === 'weekly_hours'));
 });
+
+test('fatigue: flags consecutive days worked exceeding statutory limit', () => {
+  const now = new Date('2026-10-27T00:00:00.000Z').getTime();
+  const records = [];
+  // 8 consecutive working days (limit is 6)
+  for (let i = 1; i <= 8; i++) {
+    const day = 27 - i;
+    records.push({
+      checkIn: `2026-10-${String(day).padStart(2, '0')}T09:00:00.000Z`,
+      checkOut: `2026-10-${String(day).padStart(2, '0')}T17:00:00.000Z`,
+    });
+  }
+
+  const res = assessFatigue(records, rules, now);
+  assert.ok(res.flags.some((f) => f.type === 'consecutive_days' && f.days >= 7));
+});
