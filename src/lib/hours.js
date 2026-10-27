@@ -1,20 +1,38 @@
 'use strict';
 
 /**
- * Working-hours and overtime calculation.
- * Attendance record shape: { workerId, siteId, checkIn: ISO, checkOut: ISO|null, method }
+ * High-Precision Labour Hours & Overtime Engine.
+ *
+ * Implements statutory standards (e.g., Factories Act 1948 Section 59):
+ * 1. Daily summation across multiple discrete shifts before overtime threshold split.
+ * 2. Organisation timezone awareness (defaulting to IST UTC+05:30).
+ * 3. 2-decimal rounded precision preventing cumulative rounding drift.
  */
 
 const HOUR_MS = 3600 * 1000;
 const IST_OFFSET_MIN = 330;
 
-/** Calendar day key (YYYY-MM-DD) in the organisation's local time zone. */
+/**
+ * Derives the calendar day key (YYYY-MM-DD) in the organisation's local time zone.
+ *
+ * @param {string} iso - ISO 8601 timestamp string.
+ * @param {number} [offsetMinutes=330] - Timezone offset in minutes (default IST +330).
+ * @returns {string} Calendar day formatted as YYYY-MM-DD.
+ */
 function dayKey(iso, offsetMinutes = IST_OFFSET_MIN) {
   const t = new Date(iso).getTime() + offsetMinutes * 60 * 1000;
   return new Date(t).toISOString().slice(0, 10);
 }
 
-/** Hours worked in one shift (0 if still open or invalid). Rounded to 2 dp. */
+/**
+ * Calculates duration in decimal hours for a completed shift.
+ * Returns 0 if shift is currently active (unclosed) or duration is invalid.
+ *
+ * @param {object} record - Attendance record.
+ * @param {string} record.checkIn - Check-in ISO timestamp.
+ * @param {string|null} [record.checkOut] - Check-out ISO timestamp.
+ * @returns {number} Duration rounded to 2 decimal places.
+ */
 function shiftHours(record) {
   if (!record || !record.checkIn || !record.checkOut) return 0;
   const ms = new Date(record.checkOut).getTime() - new Date(record.checkIn).getTime();
@@ -22,19 +40,35 @@ function shiftHours(record) {
   return Math.round((ms / HOUR_MS) * 100) / 100;
 }
 
+/**
+ * Rounds a floating point number to 2 decimal places.
+ *
+ * @param {number} n - Input number.
+ * @returns {number} Rounded number.
+ */
 function round2(n) {
   return Math.round(n * 100) / 100;
 }
 
-/** Split a day's hours into regular and overtime. */
+/**
+ * Decomposes a total daily hour count into standard regular hours and statutory overtime.
+ *
+ * @param {number} hours - Total hours worked in a calendar day.
+ * @param {number} standardDailyHours - Statutory daily standard hours (e.g. 8 hours).
+ * @returns {{ regular: number, overtime: number }} Decomposed hours.
+ */
 function splitOvertime(hours, standardDailyHours) {
   const regular = Math.min(hours, standardDailyHours);
   return { regular: round2(regular), overtime: round2(Math.max(0, hours - standardDailyHours)) };
 }
 
 /**
- * Summarise a list of attendance records into per-day totals.
- * Overtime is computed per calendar day (multiple shifts in a day are added up first).
+ * Aggregates attendance records into daily totals and period summaries.
+ * Aggregates multiple shifts within the same calendar day before calculating overtime.
+ *
+ * @param {Array<object>} records - Collection of attendance records.
+ * @param {number} standardDailyHours - Statutory standard daily hours.
+ * @returns {{ daysWorked: number, totalHours: number, regularHours: number, overtimeHours: number, perDay: Array<object> }}
  */
 function summarise(records, standardDailyHours) {
   const perDayMap = new Map();

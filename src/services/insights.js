@@ -1,7 +1,8 @@
 'use strict';
 
 /**
- * Workforce insights for the employer dashboard and the worker home screen.
+ * Workforce Analytics & Predictive Insights Subsystem.
+ * Computes fatigue diagnostics, payroll aggregations, and attrition risks.
  */
 const config = require('../config');
 const { summarise, shiftHours, dayKey } = require('../lib/hours');
@@ -13,7 +14,13 @@ const { FEEDBACK_TOPICS } = require('../data/seed');
 const DAY_MS = 24 * 3600 * 1000;
 const IST_OFFSET_MS = 330 * 60 * 1000;
 
-/** [from, to) epoch-ms bounds of a calendar month in IST. offset 0 = current month. */
+/**
+ * Derives epoch-ms boundaries of a calendar month in IST timezone.
+ *
+ * @param {number} now - Reference epoch millisecond timestamp.
+ * @param {number} [offset=0] - Month offset (0 = current month, 1 = previous month).
+ * @returns {{ from: number, to: number, label: string }}
+ */
 function monthBounds(now, offset = 0) {
   const local = new Date(now + IST_OFFSET_MS);
   const y = local.getUTCFullYear();
@@ -23,6 +30,14 @@ function monthBounds(now, offset = 0) {
   return { from, to, label: new Date(Date.UTC(y, m, 1)).toISOString().slice(0, 7) };
 }
 
+/**
+ * Synthesises a worker's health status including recent shifts, fatigue, and flight risk.
+ *
+ * @param {object} store - Store repository.
+ * @param {object} worker - Worker record.
+ * @param {number} now - Epoch milliseconds.
+ * @returns {{ records: Array<object>, fatigue: object, risk: object }}
+ */
 function workerStatus(store, worker, now) {
   const records = store.attendanceFor(worker.id, now - 40 * DAY_MS, now + DAY_MS);
   const fatigue = assessFatigue(records, config.labour, now);
@@ -31,6 +46,14 @@ function workerStatus(store, worker, now) {
   return { records, fatigue, risk };
 }
 
+/**
+ * Builds the frontline worker attendance view with 14-day history and fatigue flags.
+ *
+ * @param {object} store - Store repository.
+ * @param {object} worker - Worker record.
+ * @param {number} now - Epoch milliseconds.
+ * @returns {object} Attendance view DTO.
+ */
 function attendanceView(store, worker, now) {
   const { records, fatigue } = workerStatus(store, worker, now);
   const last14 = records.filter((r) => new Date(r.checkIn).getTime() >= now - 14 * DAY_MS);
@@ -48,77 +71,79 @@ function attendanceView(store, worker, now) {
   };
 }
 
-function payslipView(store, worker, now, offset = 0) {
-  const { from, to, label } = monthBounds(now, offset);
-  const records = store.attendanceFor(worker.id, from, to);
-  return { period: label, ...calculatePayslip(worker, records, config.labour) };
-}
-
-function feedbackThemes(items) {
-  return FEEDBACK_TOPICS.map((topic) => {
-    const list = items.filter((f) => f.topic === topic);
-    const avg = list.length ? list.reduce((s, f) => s + f.score, 0) / list.length : null;
-    return { topic, responses: list.length, average: avg === null ? null : Math.round(avg * 10) / 10 };
-  });
-}
-
-function orgOverview(store, orgId, now) {
-  const workers = store.workersForOrg(orgId);
-  const sites = store.sitesForOrg(orgId);
-  const today = dayKey(new Date(now).toISOString());
-
-  const attendance = store.attendanceForOrg(orgId, now - 15 * DAY_MS);
-  const trendMap = new Map();
-  for (let i = 13; i >= 0; i -= 1) trendMap.set(dayKey(new Date(now - i * DAY_MS).toISOString()), new Set());
-  for (const r of attendance) {
-    const k = dayKey(r.checkIn);
-    if (trendMap.has(k)) trendMap.get(k).add(r.workerId);
-  }
-  const trend = [...trendMap.entries()].map(([date, set]) => ({ date, present: set.size }));
-
-  const people = workers.map((w) => {
-    const { fatigue, risk } = workerStatus(store, w, now);
-    return { id: w.id, name: w.name, role: w.role, siteId: w.siteId, lang: w.lang, fatigue, risk };
-  });
-
-  const issues = store.issuesForOrg(orgId);
-  const openIssues = issues.filter((i) => i.status !== 'resolved');
-
-  const contracts = store.contractsForOrg(orgId).map((c) => {
-    const audience = workers.filter((w) => !c.siteId || w.siteId === c.siteId).length;
-    const acks = store.acksFor(c.id);
-    return {
-      id: c.id,
-      title: c.title.en || c.title[c.originalLang],
-      audience,
-      understood: acks.filter((a) => a.response === 'understood').length,
-      doubts: acks.filter((a) => a.response === 'doubt').length,
-    };
-  });
-
+/**
+ * Generates transparent payslips for current and previous calendar months.
+ *
+ * @param {object} store - Store repository.
+ * @param {object} worker - Worker record.
+ * @param {number} now - Epoch milliseconds.
+ * @returns {object} Dual-month payslip DTO.
+ */
+function payView(store, worker, now) {
+  const current = monthBounds(now, 0);
+  const prev = monthBounds(now, 1);
+  const currentRecords = store.attendanceFor(worker.id, current.from, current.to);
+  const prevRecords = store.attendanceFor(worker.id, prev.from, prev.to);
   return {
-    org: store.getOrg(orgId),
-    sites,
-    kpis: {
-      workforce: workers.length,
-      presentToday: trend.find((t) => t.date === today)?.present || 0,
-      openIssues: openIssues.length,
-      workersBehindOpenIssues: openIssues.reduce((s, i) => s + i.supportCount, 0),
-      fatigueHigh: people.filter((p) => p.fatigue.level === 'high').length,
-      attritionHigh: people.filter((p) => p.risk.level === 'high').length,
-    },
-    trend,
-    fatigue: people
-      .filter((p) => p.fatigue.level !== 'ok')
-      .sort((a, b) => b.fatigue.weekHours - a.fatigue.weekHours)
-      .slice(0, 12),
-    atRisk: people
-      .filter((p) => p.risk.level !== 'low')
-      .sort((a, b) => b.risk.score - a.risk.score)
-      .slice(0, 12),
-    feedback: feedbackThemes(store.feedbackForOrg(orgId)),
-    contracts,
+    current: { label: current.label, ...calculatePayslip(worker, currentRecords, config.labour) },
+    previous: { label: prev.label, ...calculatePayslip(worker, prevRecords, config.labour) },
   };
 }
 
-module.exports = { monthBounds, workerStatus, attendanceView, payslipView, orgOverview, feedbackThemes };
+/**
+ * Compiles holistic workforce health telemetry for the employer dashboard.
+ *
+ * @param {object} store - Store repository.
+ * @param {string} orgId - Organisation identifier.
+ * @param {number} now - Epoch milliseconds.
+ * @returns {object} Admin insights DTO.
+ */
+function adminOverview(store, orgId, now) {
+  const workers = store.workersForOrg(orgId);
+  const sites = store.sitesForOrg(orgId);
+  const siteMap = new Map(sites.map((s) => [s.id, s.name]));
+
+  let presentToday = 0;
+  const todayKey = dayKey(new Date(now).toISOString());
+
+  const workerInsights = workers.map((w) => {
+    const { records, fatigue, risk } = workerStatus(store, w, now);
+    const open = store.openShift(w.id);
+    const workedToday = open || records.some((r) => dayKey(r.checkIn) === todayKey);
+    if (workedToday) presentToday += 1;
+    const weekRecords = records.filter((r) => new Date(r.checkIn).getTime() >= now - 7 * DAY_MS);
+    const weekHours = summarise(weekRecords, config.labour.standardDailyHours).totalHours;
+    return {
+      id: w.id,
+      name: w.name,
+      role: w.role,
+      siteId: w.siteId,
+      siteName: siteMap.get(w.siteId) || 'Site',
+      openShift: Boolean(open),
+      weekHours,
+      fatigue,
+      risk,
+    };
+  });
+
+  const feedback = store.feedbackForOrg(orgId);
+  const feedbackByTopic = FEEDBACK_TOPICS.map((topic) => {
+    const matching = feedback.filter((f) => f.topic === topic);
+    const avg = matching.length ? Math.round((matching.reduce((s, f) => s + f.score, 0) / matching.length) * 10) / 10 : null;
+    return { topic, count: matching.length, average: avg };
+  });
+
+  return {
+    kpis: {
+      totalWorkers: workers.length,
+      presentToday,
+      fatigueHigh: workerInsights.filter((w) => w.fatigue.level === 'high').length,
+      attritionHigh: workerInsights.filter((w) => w.risk.level === 'high').length,
+      openIssues: store.issuesForOrg(orgId).filter((i) => i.status !== 'resolved').length,
+    },
+    workers: workerInsights,
+    feedback: feedbackByTopic,
+  };
+}
+
+module.exports = { attendanceView, payView, adminOverview, monthBounds };

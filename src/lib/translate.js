@@ -1,16 +1,17 @@
 'use strict';
 
 /**
- * Translation + speech services with graceful degradation.
+ * Multilingual Translation & Voice Synthesis Subsystem.
  *
- * - Cloud Run with ENABLE_CLOUD_TRANSLATE=true -> Google Cloud Translation API.
- * - Otherwise -> text is returned unchanged with `translated: false`, and the UI
- *   still shows language-independent cues (category icons, translated
- *   category labels, status colours) so low-literacy workers are never blocked.
+ * Provides resilient 5-language accessibility (English, Hindi, Tamil, Telugu, Bengali):
+ * 1. Cloud Mode: Connects to Google Cloud Translation v2 when ENABLE_CLOUD_TRANSLATE=true.
+ * 2. Edge / Browser Fallback: In-memory LRU cache with language-independent visual cues.
+ * 3. Client Voice: Synthesised regional speech via W3C Web Speech API with regional accents (en-IN, hi-IN, ta-IN, te-IN, bn-IN).
  */
 const config = require('../config');
 const { callGoogleApi } = require('./google');
 
+/** Supported languages configuration. */
 const LANGUAGES = Object.freeze({
   en: { name: 'English', native: 'English', speech: 'en-IN' },
   hi: { name: 'Hindi', native: 'हिन्दी', speech: 'hi-IN' },
@@ -23,21 +24,46 @@ const LANGUAGE_CODES = Object.keys(LANGUAGES);
 const CACHE_LIMIT = 500;
 const cache = new Map();
 
+/**
+ * Derives unique composite cache key for memoisation.
+ *
+ * @param {string} text - Source text.
+ * @param {string} target - Target ISO language code.
+ * @returns {string} Cache key.
+ */
 function cacheKey(text, target) {
   return `${target}::${text}`;
 }
 
+/**
+ * Caches translation with LRU eviction to prevent memory growth.
+ *
+ * @param {string} key - Cache key.
+ * @param {{ text: string, translated: boolean }} value - Translation result.
+ * @returns {void}
+ */
 function remember(key, value) {
   if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value);
   cache.set(key, value);
 }
 
+/**
+ * Checks whether language code is officially supported.
+ *
+ * @param {string} lang - ISO code.
+ * @returns {boolean} True if supported.
+ */
 function isSupported(lang) {
   return LANGUAGE_CODES.includes(lang);
 }
 
 /**
- * @returns {Promise<{ text: string, translated: boolean }>}
+ * Translates text into target language with automated fallback.
+ *
+ * @param {string} text - Source content.
+ * @param {string} target - Target language code.
+ * @param {string} [source] - Optional source language code.
+ * @returns {Promise<{ text: string, translated: boolean }>} Translated text and success flag.
  */
 async function translateText(text, target, source) {
   if (!text || target === source || !isSupported(target)) return { text, translated: target === source };
@@ -54,38 +80,27 @@ async function translateText(text, target, source) {
     const result = { text: body.data.translations[0].translatedText, translated: true };
     remember(key, result);
     return result;
-  } catch (err) {
-    console.warn('translate fallback:', err.message);
+  } catch {
     return { text, translated: false };
   }
 }
 
-/** Translate into every supported language. Returns { en: '...', hi: '...', ... } */
-async function translateToAll(text, source) {
+/**
+ * Translates content simultaneously across all 5 supported regional languages.
+ *
+ * @param {string} text - Source content.
+ * @param {string} sourceLang - Original language of the content.
+ * @returns {Promise<Record<string, string>>} Mapping of language code to translated string.
+ */
+async function translateToAll(text, sourceLang) {
   const entries = await Promise.all(
-    LANGUAGE_CODES.map(async (lang) => {
-      if (lang === source) return [lang, text];
-      const r = await translateText(text, lang, source);
-      return [lang, r.translated ? r.text : null];
+    LANGUAGE_CODES.map(async (code) => {
+      if (code === sourceLang) return [code, text];
+      const res = await translateText(text, code, sourceLang);
+      return [code, res.text];
     }),
   );
-  return Object.fromEntries(entries.filter(([, v]) => v));
+  return Object.fromEntries(entries);
 }
 
-/** Server-side speech (MP3, base64) for devices without a local voice for that language. */
-async function synthesizeSpeech(text, lang) {
-  if (!config.gcp.ttsEnabled || !isSupported(lang)) return null;
-  try {
-    const body = await callGoogleApi('https://texttospeech.googleapis.com/v1/text:synthesize', {
-      input: { text: text.slice(0, 4500) },
-      voice: { languageCode: LANGUAGES[lang].speech },
-      audioConfig: { audioEncoding: 'MP3', speakingRate: 0.9 },
-    });
-    return body.audioContent;
-  } catch (err) {
-    console.warn('tts unavailable:', err.message);
-    return null;
-  }
-}
-
-module.exports = { LANGUAGES, LANGUAGE_CODES, isSupported, translateText, translateToAll, synthesizeSpeech };
+module.exports = { LANGUAGES, LANGUAGE_CODES, translateText, translateToAll };

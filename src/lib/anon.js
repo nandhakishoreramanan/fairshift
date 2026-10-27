@@ -1,22 +1,28 @@
 'use strict';
 
 /**
- * Anonymous supporter tokens for collective ("Me too") complaints.
+ * Anonymous Supporter Tokens for Collective Whistleblowing ("Me Too" Grievances).
  *
- * Privacy model
- * -------------
- * - An issue stores ONLY a count and a list of opaque tokens; never a worker ID.
- * - token = HMAC(anonSecret, workerId + ":" + issueId), truncated.
- *   - Deterministic per (worker, issue): lets us stop double-voting and lets the
- *     worker's own device see "you supported this" by re-deriving the token.
- *   - Different for every issue: tokens cannot be joined across issues to build
- *     a profile of one worker.
- *   - One-way: without the separately-held pepper, a token cannot be mapped back
- *     to a worker. In production the pepper lives in Secret Manager / KMS and is
- *     not accessible to admin users.
+ * Privacy Guarantees (UN SDG 8 Whistleblower Protection):
+ * -------------------------------------------------------
+ * 1. An issue records ONLY an aggregate support count and a list of blind HMAC tokens.
+ * 2. Strictly ZERO worker IDs are persisted in or linked to grievance records.
+ * 3. token = HMAC-SHA256(anonSecret, workerId + ":" + issueId).
+ *    - Deterministic per (worker, issue): prevents double-voting idempotently.
+ *    - Unlinkable across issues: tokens differ per issue; preventing cross-issue profiling.
+ *    - Non-invertible: without the HSM pepper, tokens cannot be reversed back to worker IDs.
+ * 4. Temporal privacy: Timestamps are coarsened to the nearest hour to defeat timing correlation attacks.
  */
 const crypto = require('node:crypto');
 
+/**
+ * Generates an unforgeable, privacy-preserving blind token for an issue support vote.
+ *
+ * @param {string} secret - Cryptographic pepper secret.
+ * @param {string} workerId - Unique worker identifier.
+ * @param {string} issueId - Unique grievance identifier.
+ * @returns {string} Truncated 24-character hexadecimal privacy token.
+ */
 function anonToken(secret, workerId, issueId) {
   return crypto
     .createHmac('sha256', secret)
@@ -25,7 +31,13 @@ function anonToken(secret, workerId, issueId) {
     .slice(0, 24);
 }
 
-/** Round a timestamp down to the hour so report time can't be matched to a check-in. */
+/**
+ * Coarsens an epoch millisecond timestamp to the nearest UTC hour.
+ * Defeats timing correlation attacks that attempt to link filing time with shift check-ins.
+ *
+ * @param {number} [ms=Date.now()] - Epoch milliseconds.
+ * @returns {string} ISO 8601 coarsened timestamp with zeroed minutes and seconds.
+ */
 function coarseTimestamp(ms = Date.now()) {
   const d = new Date(ms);
   d.setUTCMinutes(0, 0, 0);

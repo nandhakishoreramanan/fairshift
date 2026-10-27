@@ -67,7 +67,9 @@ function calculatePayslip(worker, records, rules, extra = {}) {
   if (worker.pf) {
     deductions.push({ code: 'pf', amount: money(basic * PF_RATE), params: { percent: PF_RATE * 100, basic } });
   }
-  if (worker.esi && gross <= ESI_WAGE_CEILING) {
+  // Statutory ESI Wage Ceiling: workers earning > ₹21,000/month are exempt from ESI
+  const monthlyWageEquivalent = worker.payType === 'monthly' ? worker.monthlySalary : dailyRate * STANDARD_MONTH_DAYS;
+  if (worker.esi && monthlyWageEquivalent <= ESI_WAGE_CEILING) {
     deductions.push({ code: 'esi', amount: money(gross * ESI_RATE), params: { percent: ESI_RATE * 100, gross } });
   }
   if (extra.advances) {

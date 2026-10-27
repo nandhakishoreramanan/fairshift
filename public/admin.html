@@ -21,26 +21,26 @@
           <span style="font-size:0.75rem; font-weight:800; opacity:0.8;">FS<span class="dot">.</span></span>
         </a>
 
-        <nav class="sidebar-nav" role="tablist">
-          <button id="tab-btn-issues" class="sidebar-item active" role="tab" aria-selected="true" title="Collective Grievances">
+        <nav class="sidebar-nav" role="tablist" aria-label="Dashboard Views">
+          <button id="tab-btn-issues" class="sidebar-item active" role="tab" aria-selected="true" aria-controls="tab-panel-issues" aria-label="Collective Grievances">
             <span aria-hidden="true">📢</span>
           </button>
-          <button id="tab-btn-fatigue" class="sidebar-item" role="tab" aria-selected="false" title="Fatigue &amp; Attrition Radar">
+          <button id="tab-btn-fatigue" class="sidebar-item" role="tab" aria-selected="false" aria-controls="tab-panel-fatigue" aria-label="Fatigue and Attrition Radar">
             <span aria-hidden="true">😴</span>
           </button>
-          <button id="tab-btn-contracts" class="sidebar-item" role="tab" aria-selected="false" title="Contracts &amp; Multilingual Voice Policy">
+          <button id="tab-btn-contracts" class="sidebar-item" role="tab" aria-selected="false" aria-controls="tab-panel-contracts" aria-label="Contracts and Policy Notices">
             <span aria-hidden="true">📜</span>
           </button>
-          <button id="tab-btn-workers" class="sidebar-item" role="tab" aria-selected="false" title="Workforce &amp; Skill Passports">
+          <button id="tab-btn-workers" class="sidebar-item" role="tab" aria-selected="false" aria-controls="tab-panel-workers" aria-label="Workforce Directory and Skill Passports">
             <span aria-hidden="true">👷</span>
           </button>
-          <button id="tab-btn-kiosk" class="sidebar-item" role="tab" aria-selected="false" title="Gate QR Attendance Kiosk">
+          <button id="tab-btn-kiosk" class="sidebar-item" role="tab" aria-selected="false" aria-controls="kiosk-modal" aria-label="Gate QR Attendance Kiosk">
             <span aria-hidden="true">📲</span>
           </button>
         </nav>
 
         <div class="sidebar-footer">
-          <button id="admin-logout" class="sidebar-item" type="button" title="Log out">
+          <button id="admin-logout" class="sidebar-item" type="button" aria-label="Log out of Admin Dashboard" title="Log out">
             <span aria-hidden="true">🚪</span>
           </button>
         </div>
@@ -276,8 +276,8 @@
           
           <!-- Top Utility Bar -->
           <div class="top-user-bar">
-            <button class="icon-circle-btn" type="button" title="Settings">⚙️</button>
-            <button class="icon-circle-btn" type="button" title="Notifications">🔔</button>
+            <button class="icon-circle-btn" type="button" aria-label="Settings" title="Settings">⚙️</button>
+            <button class="icon-circle-btn" type="button" aria-label="Notifications" title="Notifications">🔔</button>
             <div class="user-avatar-badge">
               <div class="user-avatar-img" id="user-initials">HR</div>
               <span class="small strong" id="admin-user-info">Admin</span>
@@ -297,7 +297,7 @@
                 <div class="func-bottom">
                   <span>60h Limit</span>
                   <label class="toggle-switch">
-                    <input type="checkbox" checked disabled>
+                    <input type="checkbox" checked disabled aria-label="Fatigue Cap 60 Hour Limit">
                     <span class="toggle-slider"></span>
                   </label>
                 </div>
@@ -311,7 +311,7 @@
                 <div class="func-bottom">
                   <span>Active</span>
                   <label class="toggle-switch">
-                    <input type="checkbox" checked id="toggle-kiosk-view">
+                    <input type="checkbox" checked id="toggle-kiosk-view" aria-label="Toggle Gate Kiosk View">
                     <span class="toggle-slider"></span>
                   </label>
                 </div>
@@ -325,7 +325,7 @@
                 <div class="func-bottom">
                   <span>5 Langs</span>
                   <label class="toggle-switch">
-                    <input type="checkbox" checked disabled>
+                    <input type="checkbox" checked disabled aria-label="Automatic Voice Synthesis 5 Languages">
                     <span class="toggle-slider"></span>
                   </label>
                 </div>
@@ -339,7 +339,7 @@
                 <div class="func-bottom">
                   <span>Zero-ID</span>
                   <label class="toggle-switch">
-                    <input type="checkbox" checked disabled>
+                    <input type="checkbox" checked disabled aria-label="Anonymous Whistleblower Shield Zero Worker IDs">
                     <span class="toggle-slider"></span>
                   </label>
                 </div>

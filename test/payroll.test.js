@@ -75,3 +75,35 @@ test('payroll: monthly salaried employee in college pro-rates by worked days', (
   const basic = slip.earnings.find((e) => e.code === 'basic_monthly');
   assert.equal(basic.amount, 10000); // 10 days * 1000
 });
+
+test('payroll: zero attendance produces zero wage with no NaN values', () => {
+  const worker = {
+    payType: 'daily',
+    dailyWage: 700,
+    allowances: [],
+    pf: true,
+    esi: true,
+  };
+
+  const slip = calculatePayslip(worker, [], rules);
+  assert.equal(slip.gross, 0);
+  assert.equal(slip.net, 0);
+  assert.equal(Number.isNaN(slip.net), false);
+  assert.equal(slip.hours.daysWorked, 0);
+});
+
+test('payroll: wages exceeding statutory ESI ceiling exempt worker from ESI deduction', () => {
+  const highSalaryWorker = {
+    payType: 'monthly',
+    monthlySalary: 45000, // Exceeds ESI ceiling of ₹21,000
+    allowances: [],
+    pf: true,
+    esi: true,
+  };
+
+  const records = [{ checkIn: '2026-10-01T09:00:00.000Z', checkOut: '2026-10-01T17:00:00.000Z' }];
+  const slip = calculatePayslip(highSalaryWorker, records, rules);
+
+  const esi = slip.deductions.find((d) => d.code === 'esi');
+  assert.equal(esi, undefined); // Excluded due to statutory wage ceiling
+});
