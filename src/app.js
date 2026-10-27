@@ -48,4 +48,25 @@ function createApp({ config = defaultConfig, clock = Date.now, store } = {}) {
   return app;
 }
 
-module.exports = { createApp };
+// Lazy singleton app for serverless runtimes (like Vercel)
+let defaultAppInstance = null;
+function getDefaultApp() {
+  if (!defaultAppInstance) {
+    defaultAppInstance = createApp();
+  }
+  return defaultAppInstance;
+}
+
+// Handler that satisfies both Vercel Serverless Function requirements
+// and local modular imports: const { createApp } = require('./app')
+function handler(req, res) {
+  if (req && req.url && res && typeof res.setHeader === 'function') {
+    return getDefaultApp()(req, res);
+  }
+  return createApp(req);
+}
+
+handler.createApp = createApp;
+handler.getApp = getDefaultApp;
+
+module.exports = handler;
