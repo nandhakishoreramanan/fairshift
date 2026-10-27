@@ -26,19 +26,23 @@ function createApp({ config = defaultConfig, clock = Date.now, store } = {}) {
   app.use('/api', require('./routes/public')(deps));
   app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 
-  app.use(
-    express.static(path.join(__dirname, '..', 'public'), {
-      extensions: ['html'],
-      maxAge: 0,
-      setHeaders: (res, filePath) => {
-        if (filePath.endsWith('sw.js') || filePath.endsWith('.html')) {
-          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-          res.setHeader('Pragma', 'no-cache');
-          res.setHeader('Expires', '0');
-        }
-      },
-    }),
-  );
+  const fs = require('node:fs');
+  const publicDir = path.join(__dirname, '..', 'public');
+  if (fs.existsSync(publicDir)) {
+    app.use(
+      express.static(publicDir, {
+        extensions: ['html'],
+        maxAge: 0,
+        setHeaders: (res, filePath) => {
+          if (filePath.endsWith('sw.js') || filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+          }
+        },
+      }),
+    );
+  }
 
   app.use(errorHandler);
   return app;
