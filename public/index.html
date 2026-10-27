@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FairShift – fair, safe and transparent work for construction sites, colleges, hospitals and factories. UN SDG 8.">
+  <meta name="theme-color" content="#27245c">
+  <title>FairShift – Decent Work Platform</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/app.css?v=4">
+</head>
+<body class="landing">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="landing-shell">
+    <div class="landing-card-wrapper">
+      
+      <!-- Topbar Header -->
+      <header class="landing-topbar">
+        <div class="landing-brand">
+          <span style="font-size:1.6rem;" aria-hidden="true">⚖️</span>
+          <span>FairShift</span>
+        </div>
+        <span class="landing-sdg-badge" title="UN Sustainable Development Goal 8">SDG 8 · Decent Work</span>
+      </header>
+
+      <main id="main">
+        <!-- Hero Banner matching design -->
+        <section class="landing-hero">
+          <h1 data-i18n="tagline">Fair work. Clear pay. Safe workplace.</h1>
+          <p>One unified decent-work platform for frontline employees and management across construction sites, college campuses, hospitals, and factories.</p>
+        </section>
+
+        <!-- Choose Language Card -->
+        <section aria-labelledby="lang-h" class="lang-box-card">
+          <h2 id="lang-h"><span aria-hidden="true">🌐</span> <span data-i18n="choose_lang">Choose your language</span></h2>
+          <div id="lang-grid" class="lang-grid" role="radiogroup" aria-labelledby="lang-h"></div>
+        </section>
+
+        <!-- Sector Selector Section -->
+        <section class="sector-selection-box" aria-labelledby="sector-h">
+          <div class="row space">
+            <div>
+              <h2 id="sector-h"><span aria-hidden="true">🏢</span> Select Workplace Sector</h2>
+              <p class="muted small">Select your industry to load customized shift models, salary calculations, and safety features.</p>
+            </div>
+            <span class="pill status-resolved" id="active-sector-indicator">🏗️ Construction Active</span>
+          </div>
+
+          <div class="sector-grid" role="radiogroup" aria-labelledby="sector-h">
+            
+            <!-- Sector 1: Construction -->
+            <button type="button" class="sector-card-btn active" id="sector-btn-construction" role="radio" aria-checked="true">
+              <div class="sector-card-header">
+                <span class="sector-card-icon">🏗️</span>
+                <span class="sector-active-badge">Selected Sector</span>
+              </div>
+              <div class="sector-card-title">Construction Sites</div>
+              <div class="sector-card-org">BuildRight Infra Pvt Ltd</div>
+              <div class="sector-card-desc">Daily wage workers, masons, helpers, 2× statutory overtime, gate QR check-in, scaffolding &amp; water hazard reporting.</div>
+              <div class="sector-tags">
+                <span class="sector-tag">Daily Wage</span>
+                <span class="sector-tag">2× Overtime</span>
+                <span class="sector-tag">Gate QR Kiosk</span>
+                <span class="sector-tag">Scaffold Safety</span>
+              </div>
+            </button>
+
+            <!-- Sector 2: Education / College & School -->
+            <button type="button" class="sector-card-btn" id="sector-btn-college" role="radio" aria-checked="false">
+              <div class="sector-card-header">
+                <span class="sector-card-icon">🎓</span>
+                <span class="sector-active-badge">Selected Sector</span>
+              </div>
+              <div class="sector-card-title">Colleges &amp; Schools</div>
+              <div class="sector-card-org">Sunrise Arts &amp; Science College</div>
+              <div class="sector-card-desc">Contract faculty, lab assistants, campus housekeeping, pro-rated monthly pay, exam invigilation allowances, and audio contract renewals.</div>
+              <div class="sector-tags">
+                <span class="sector-tag">Monthly Salary</span>
+                <span class="sector-tag">Invigilation Duty</span>
+                <span class="sector-tag">Lab Fire Safety</span>
+                <span class="sector-tag">Rest Facilities</span>
+              </div>
+            </button>
+
+          </div>
+        </section>
+
+        <!-- Dual Login Cards -->
+        <div class="login-grid">
+          
+          <!-- Worker Login Card -->
+          <section class="login-card" aria-labelledby="w-login-h">
+            <h2 id="w-login-h">
+              <span aria-hidden="true">👷</span>
+              <span data-i18n="login_title">Worker login</span>
+            </h2>
+            <form id="worker-form" class="stack" novalidate>
+              <div>
+                <label for="w-id" data-i18n="worker_id">Worker ID</label>
+                <input id="w-id" name="id" autocomplete="username" required maxlength="20" class="input-xl" placeholder="W1001">
+              </div>
+              <div>
+                <label for="w-pin" data-i18n="pin">PIN</label>
+                <input id="w-pin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" required minlength="4" maxlength="8" class="input-xl" placeholder="••••">
+              </div>
+              <button class="btn btn-primary btn-xl" type="submit" data-i18n="login">Log in</button>
+              <button type="button" id="btn-camera-login" class="btn btn-camera btn-xl" data-i18n="scan_badge_login">📷 Scan Badge QR to Log In</button>
+              <p class="form-error" id="worker-error" role="alert"></p>
+            </form>
+            <details class="demo">
+              <summary>Demo workers (PIN 1234)</summary>
+              <ul id="demo-workers" class="demo-list"></ul>
+            </details>
+          </section>
+
+          <!-- Employer / Admin Login Card -->
+          <section class="login-card" aria-labelledby="a-login-h">
+            <h2 id="a-login-h">
+              <span aria-hidden="true">🏢</span>
+              <span>Employer / Admin login</span>
+            </h2>
+            <form id="admin-form" class="stack" novalidate>
+              <div>
+                <label for="a-id">Admin ID</label>
+                <input id="a-id" name="id" autocomplete="username" required maxlength="20" placeholder="A-BUILD">
+              </div>
+              <div>
+                <label for="a-pin">PIN</label>
+                <input id="a-pin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" required minlength="4" maxlength="8" placeholder="••••">
+              </div>
+              <button class="btn btn-dark btn-xl" type="submit">Open Dashboard</button>
+              <p class="form-error" id="admin-error" role="alert"></p>
+            </form>
+            <details class="demo">
+              <summary>Demo employers (PIN 9999)</summary>
+              <ul id="demo-admins" class="demo-list"></ul>
+            </details>
+          </section>
+
+        </div>
+
+        <!-- Cross-Industry Adoption Card -->
+        <section class="industry-section" aria-labelledby="ind-h">
+          <h2 id="ind-h">Validated Across Multiple Sectors</h2>
+          <div class="industry-grid">
+            <article>
+              <h3><span aria-hidden="true">🏗️</span> Construction Sites (BuildRight Infra)</h3>
+              <p>Daily-wage shift workers check in with dynamic rolling QR codes. Overtime is paid at 2× statutory rate and explained line by line. Migrant workers report loose scaffolds or water scarcity in Tamil, Hindi, or Telugu, backed by peer "Me Too" votes.</p>
+            </article>
+            <article>
+              <h3><span aria-hidden="true">🎓</span> Colleges &amp; Schools (Sunrise College)</h3>
+              <p>Contract faculty, lab staff, and housekeeping staff see pro-rated monthly salaries, PF, and ESI clearly. Contract renewals are read aloud in regional languages with "I understood" acknowledgment, and overworked educators are flagged early.</p>
+            </article>
+          </div>
+        </section>
+
+      </main>
+
+      <footer class="footer">FairShift · Prompt Wars 2026 · Built for UN SDG 8 – Decent Work &amp; Economic Growth</footer>
+
+    </div>
+  </div>
+
+  <script src="/js/i18n.js?v=4"></script>
+  <script src="/js/common.js?v=4"></script>
+  <script src="/js/vendor/jsQR.js"></script>
+  <script src="/js/scanner.js?v=4"></script>
+  <script src="/js/index.js?v=4"></script>
+</body>
+</html>

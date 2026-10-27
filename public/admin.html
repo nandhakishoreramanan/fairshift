@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#27245c">
+  <title>FairShift – Employer &amp; Admin Dashboard</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/app.css?v=4">
+</head>
+<body class="admin-app">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <div class="admin-layout-wrapper">
+    <div class="admin-shell">
+      
+      <!-- Left Deep Navy Sidebar -->
+      <aside class="admin-sidebar" aria-label="Sidebar Navigation">
+        <a href="/" class="sidebar-logo" title="FairShift Home">
+          <span>⚖️</span>
+          <span style="font-size:0.75rem; font-weight:800; opacity:0.8;">FS<span class="dot">.</span></span>
+        </a>
+
+        <nav class="sidebar-nav" role="tablist">
+          <button id="tab-btn-issues" class="sidebar-item active" role="tab" aria-selected="true" title="Collective Grievances">
+            <span aria-hidden="true">📢</span>
+          </button>
+          <button id="tab-btn-fatigue" class="sidebar-item" role="tab" aria-selected="false" title="Fatigue &amp; Attrition Radar">
+            <span aria-hidden="true">😴</span>
+          </button>
+          <button id="tab-btn-contracts" class="sidebar-item" role="tab" aria-selected="false" title="Contracts &amp; Multilingual Voice Policy">
+            <span aria-hidden="true">📜</span>
+          </button>
+          <button id="tab-btn-workers" class="sidebar-item" role="tab" aria-selected="false" title="Workforce &amp; Skill Passports">
+            <span aria-hidden="true">👷</span>
+          </button>
+          <button id="tab-btn-kiosk" class="sidebar-item" role="tab" aria-selected="false" title="Gate QR Attendance Kiosk">
+            <span aria-hidden="true">📲</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button id="admin-logout" class="sidebar-item" type="button" title="Log out">
+            <span aria-hidden="true">🚪</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Dashboard Grid -->
+      <main id="main-content" class="admin-main">
+        
+        <!-- Left Column -->
+        <div class="admin-left-col">
+          
+          <!-- Top Hero Welcome Banner -->
+          <section class="hero-banner">
+            <div class="hero-text">
+              <h1 id="welcome-heading">Hello, Admin!</h1>
+              <p id="org-industry-desc">Welcome back to FairShift Workforce Radar &amp; Decent Work Analytics.</p>
+              <div class="hero-pill" id="hero-badge">UN SDG 8 · Decent Work</div>
+            </div>
+          </section>
+
+          <!-- Week Calendar Strip -->
+          <section class="calendar-strip-wrapper" aria-label="Shift Schedule Overview">
+            <div class="calendar-header">
+              <div class="calendar-title">
+                <span id="calendar-date-range">This Week</span>
+                <span class="badge-nav">&lt; &gt;</span>
+              </div>
+              <div class="row">
+                <button id="btn-refresh" class="btn btn-secondary" style="padding:6px 12px; font-size:0.8rem;" type="button">🔄 Refresh Data</button>
+              </div>
+            </div>
+
+            <div class="calendar-days" id="calendar-days-row">
+              <div class="cal-day-cell"><span>Mon</span><span class="num">21</span><span class="dot"></span></div>
+              <div class="cal-day-cell"><span>Tue</span><span class="num">22</span><span class="dot"></span></div>
+              <div class="cal-day-cell"><span>Wed</span><span class="num">23</span><span class="dot"></span></div>
+              <div class="cal-day-cell"><span>Thu</span><span class="num">24</span><span class="dot"></span></div>
+              <div class="cal-day-cell active"><span>Fri</span><span class="num">25</span><span class="dot"></span></div>
+              <div class="cal-day-cell"><span>Sat</span><span class="num">26</span><span class="dot"></span></div>
+              <div class="cal-day-cell"><span>Sun</span><span class="num">27</span><span class="dot"></span></div>
+            </div>
+          </section>
+
+          <!-- 4 Squircle KPI Cards (Matching UI Design) -->
+          <section class="kpi-cards-grid" aria-label="Key Performance Indicators">
+            <div class="squircle-kpi orange">
+              <div class="icon-box">👥</div>
+              <div class="label">Total Workforce</div>
+              <div id="kpi-workforce" class="stat-pill">0</div>
+            </div>
+
+            <div class="squircle-kpi rose">
+              <div class="icon-box">📢</div>
+              <div class="label">Open Issues</div>
+              <div id="kpi-issues" class="stat-pill">0</div>
+            </div>
+
+            <div class="squircle-kpi cyan">
+              <div class="icon-box">😴</div>
+              <div class="label">Fatigue Flags</div>
+              <div id="kpi-fatigue" class="stat-pill">0</div>
+            </div>
+
+            <div class="squircle-kpi purple">
+              <div class="icon-box">⚡</div>
+              <div class="label">Flight Risk</div>
+              <div id="kpi-attrition" class="stat-pill">0</div>
+            </div>
+          </section>
+
+          <!-- Dynamic Tab Content Panels -->
+          
+          <!-- Tab 1: Collective Grievances ("Me Too") -->
+          <section id="tab-panel-issues" class="stack">
+            <div class="card">
+              <div class="row space">
+                <div>
+                  <h2>Collective Worker Grievances &amp; Hazard Reports</h2>
+                  <p class="muted">Ranked by peer worker backing. Cryptographically shielded against whistleblower identification.</p>
+                </div>
+                <span class="pill status-resolved">🔒 Retaliation Protected</span>
+              </div>
+            </div>
+            <div id="issues-container" class="stack"></div>
+          </section>
+
+          <!-- Tab 2: Fatigue & Attrition Monitoring -->
+          <section id="tab-panel-fatigue" class="stack" style="display:none;">
+            <div class="card">
+              <h2>Fatigue Monitoring (Overtime &amp; Back-to-Back Shifts)</h2>
+              <p class="muted">Flags workers exceeding safe labour thresholds (&gt;60 hrs/week, &gt;12 hrs/day, &lt;10 hrs rest between shifts, or 7+ consecutive days).</p>
+              <div class="table-responsive" style="margin-top:12px;">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Worker</th>
+                      <th>Role &amp; Site</th>
+                      <th>Week Hours</th>
+                      <th>Fatigue Flags</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="fatigue-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2>Attrition Risk Radar (Likely to Quit)</h2>
+              <p class="muted">Computed from attendance variance, tenure, and fatigue. Whistleblower complaints are strictly excluded from flight risk.</p>
+              <div class="table-responsive" style="margin-top:12px;">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Worker</th>
+                      <th>Role &amp; Site</th>
+                      <th>Risk Score</th>
+                      <th>Primary Drivers</th>
+                      <th>Retention Strategy</th>
+                    </tr>
+                  </thead>
+                  <tbody id="attrition-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2>Anonymous Pulse Feedback (Last 30 Days)</h2>
+              <p class="muted">Aggregated rating (1-5) across supervisors, safety, and facilities.</p>
+              <div id="feedback-grid" class="kpi-cards-grid" style="margin-top:12px;"></div>
+            </div>
+          </section>
+
+          <!-- Tab 3: Contracts & Multilingual Voice Policies -->
+          <section id="tab-panel-contracts" class="stack" style="display:none;">
+            <div class="card">
+              <h2>Publish New Contract / Policy Notice</h2>
+              <p class="muted">Auto-translates into Tamil, Hindi, Telugu, and Bengali. Frontline workers can tap "Listen" to hear it in their language.</p>
+              <form id="create-contract-form" class="stack" style="margin-top:14px;">
+                <div>
+                  <label for="contract-title">Title / Notice Heading</label>
+                  <input id="contract-title" required placeholder="e.g. Overtime Pay Revision & Mandatory Rest Schedule">
+                </div>
+                <div>
+                  <label for="contract-site">Target Location</label>
+                  <select id="contract-site">
+                    <option value="">All Sites &amp; Departments</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="contract-body">Notice Body (Plain language recommended)</label>
+                  <textarea id="contract-body" rows="4" required placeholder="Explain shift timings, double overtime rates, water facilities, and weekly off policies..."></textarea>
+                </div>
+                <button class="btn btn-primary" type="submit">📢 Publish &amp; Auto-Translate Notice</button>
+              </form>
+            </div>
+
+            <div class="card">
+              <h2>Active Contracts &amp; Comprehension Status</h2>
+              <div id="contracts-list" class="stack" style="margin-top:12px;"></div>
+            </div>
+          </section>
+
+          <!-- Tab 4: Workforce & Skills -->
+          <section id="tab-panel-workers" class="stack" style="display:none;">
+            <div class="card">
+              <h2>Issue Verified Skill Passport Credential</h2>
+              <p class="muted">Endow portable credentials for safety induction, machine operation, masonry, or academic training.</p>
+              <form id="issue-skill-form" class="stack" style="margin-top:14px;">
+                <div class="row">
+                  <div style="flex:1;">
+                    <label for="skill-worker">Select Worker</label>
+                    <select id="skill-worker" required></select>
+                  </div>
+                  <div style="flex:1;">
+                    <label for="skill-type">Credential Type</label>
+                    <select id="skill-type" required>
+                      <option value="certification">Certification</option>
+                      <option value="training">Safety / Skills Training</option>
+                      <option value="experience">Experience Milestone</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label for="skill-title">Title</label>
+                  <input id="skill-title" required placeholder="e.g. Certified Scaffolding &amp; Height Safety – Level 2">
+                </div>
+                <button class="btn btn-primary" type="submit">🎓 Issue &amp; Verify Credential</button>
+              </form>
+            </div>
+
+            <div class="card">
+              <h2>All Active Employees</h2>
+              <div class="table-responsive" style="margin-top:12px;">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Role</th>
+                      <th>Site</th>
+                      <th>Language</th>
+                      <th>Fatigue</th>
+                      <th>Attrition</th>
+                      <th>Skills</th>
+                    </tr>
+                  </thead>
+                  <tbody id="workers-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- Tab 5: Site Gate QR Kiosk -->
+          <section id="tab-panel-kiosk" class="stack" style="display:none;">
+            <div class="card kiosk-card">
+              <h2>Gate Check-in QR Poster / Kiosk Display</h2>
+              <p class="muted">Display this on an iPad or print for the gate. The 6-digit code and QR rotate every 2 minutes to eliminate buddy-punching.</p>
+              <div style="margin:16px 0;">
+                <label for="kiosk-site-select">Select Workplace Site:</label>
+                <select id="kiosk-site-select" style="max-width:320px; display:inline-block;"></select>
+              </div>
+              <div id="kiosk-qr-container" class="kiosk-qr"></div>
+              <div class="muted small">OR ENTER TODAY'S 6-DIGIT CODE:</div>
+              <div id="kiosk-code-display" class="kiosk-code">------</div>
+              <p class="muted small">Rotating in <strong id="kiosk-timer">--</strong> seconds</p>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right Column (Sidebar Controls & Live Attendance Trends) -->
+        <div class="admin-right-col">
+          
+          <!-- Top Utility Bar -->
+          <div class="top-user-bar">
+            <button class="icon-circle-btn" type="button" title="Settings">⚙️</button>
+            <button class="icon-circle-btn" type="button" title="Notifications">🔔</button>
+            <div class="user-avatar-badge">
+              <div class="user-avatar-img" id="user-initials">HR</div>
+              <span class="small strong" id="admin-user-info">Admin</span>
+            </div>
+          </div>
+
+          <!-- Other Functions (Quick Controls matching the Design) -->
+          <div class="right-panel-box">
+            <div class="section-subtitle">Workforce Safeguards</div>
+            <div class="quick-func-grid">
+              
+              <div class="func-card">
+                <div class="func-top-bar rose">
+                  <span>Fatigue Cap</span>
+                  <span>🛡️</span>
+                </div>
+                <div class="func-bottom">
+                  <span>60h Limit</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked disabled>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="func-card">
+                <div class="func-top-bar orange">
+                  <span>Gate Kiosk</span>
+                  <span>📲</span>
+                </div>
+                <div class="func-bottom">
+                  <span>Active</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked id="toggle-kiosk-view">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="func-card">
+                <div class="func-top-bar cyan">
+                  <span>Auto Voice</span>
+                  <span>🔊</span>
+                </div>
+                <div class="func-bottom">
+                  <span>5 Langs</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked disabled>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="func-card">
+                <div class="func-top-bar purple">
+                  <span>Anon Shield</span>
+                  <span>🔒</span>
+                </div>
+                <div class="func-bottom">
+                  <span>Zero-ID</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked disabled>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Statistics of Attendance (Vertical Bars Chart matching the Design) -->
+          <div class="chart-box">
+            <div class="row space">
+              <div>
+                <div class="muted small strong" style="letter-spacing:0.04em;">CURRENT ATTENDANCE</div>
+                <div style="font-size:1.8rem; font-weight:900; color:var(--text-main);" id="chart-attendance-rate">0%</div>
+              </div>
+              <span class="pill status-resolved">Live</span>
+            </div>
+
+            <div class="chart-bars-row" id="trend-bars-container">
+              <!-- Rendered dynamically -->
+            </div>
+            
+            <div class="muted small" style="text-align:center;">
+              <span id="kpi-present">0</span> workers present on shift today
+            </div>
+          </div>
+
+          <!-- Quick Gate Kiosk Pill -->
+          <button id="btn-open-kiosk" class="btn btn-dark btn-xl" type="button">
+            📱 Launch Site Gate QR
+          </button>
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="/js/common.js?v=4"></script>
+  <script src="/js/admin.js?v=4"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="20" fill="#0f6e56"/>
+  <!-- Scales of balance representing fair work & SDG 8 -->
+  <path d="M50 20 v55 M30 75 h40" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+  <path d="M22 36 h56" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+  <!-- Left Pan -->
+  <path d="M25 36 l-10 18 h20 z" fill="#dcfce7" stroke="#ffffff" stroke-width="2"/>
+  <!-- Right Pan -->
+  <path d="M75 36 l-10 18 h20 z" fill="#dcfce7" stroke="#ffffff" stroke-width="2"/>
+</svg>
